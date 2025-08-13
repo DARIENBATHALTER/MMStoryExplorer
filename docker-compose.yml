@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  story-explorer:
+    image: php:8-apache
+    container_name: story-explorer
+    ports:
+      - "8080:80"
+    volumes:
+      # Map your app files
+      - ./:/var/www/html:ro
+      # Map the NFS archive folder
+      - /mnt/user/MM/AutoExport:/archives:ro
+    restart: unless-stopped

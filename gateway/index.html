@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Access Checkpoint</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+        }
+
+        .lock-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a202c;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #4a5568;
+            font-size: 16px;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .security-notice {
+            background: #f7fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 32px;
+        }
+
+        .security-notice h3 {
+            color: #2d3748;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .security-notice p {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .status-checking {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            color: #718096;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 32px 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .lock-icon {
+                width: 64px;
+                height: 64px;
+            }
+
+            .lock-icon svg {
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon-container">
+            <div class="lock-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                </svg>
+            </div>
+        </div>
+
+        <h1>Secure Access Checkpoint</h1>
+        <p class="subtitle">VPN connection required to proceed</p>
+
+        <div class="security-notice">
+            <h3>Security Notice</h3>
+            <p>This service requires a secure VPN connection. Please ensure you are connected to the authorized VPN before proceeding.</p>
+        </div>
+
+        <div class="button-container">
+            <button class="btn btn-primary" onclick="checkConnection()">
+                <span id="btn-text">Connect to Service</span>
+                <span id="spinner" class="spinner" style="display: none;"></span>
+            </button>
+        </div>
+
+        <div id="status-message" class="status-message"></div>
+    </div>
+
+    <script>
+        const INTERNAL_URL = 'http://192.168.4.22:8080';
+        const CHECK_TIMEOUT = 5000; // 5 seconds timeout
+
+        async function checkConnection() {
+            const button = document.querySelector('.btn-primary');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('spinner');
+            const statusMessage = document.getElementById('status-message');
+
+            // Show checking state
+            button.disabled = true;
+            btnText.textContent = 'Checking connection';
+            spinner.style.display = 'inline-block';
+            statusMessage.className = 'status-message status-checking';
+            statusMessage.textContent = 'Verifying VPN connection...';
+            statusMessage.style.display = 'block';
+
+            try {
+                // Create a timeout promise
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Connection timeout')), CHECK_TIMEOUT);
+                });
+
+                // Try to fetch with no-cors to check if the server is reachable
+                const checkPromise = fetch(INTERNAL_URL, {
+                    mode: 'no-cors',
+                    cache: 'no-cache'
+                });
+
+                // Race between fetch and timeout
+                await Promise.race([checkPromise, timeoutPromise]);
+
+                // If we get here, the server is reachable
+                statusMessage.className = 'status-message status-success';
+                statusMessage.textContent = 'Connection established! Redirecting...';
+                
+                setTimeout(() => {
+                    window.location.href = INTERNAL_URL;
+                }, 1500);
+
+            } catch (error) {
+                // Connection failed
+                statusMessage.className = 'status-message status-error';
+                statusMessage.textContent = 'Connection failed. Please ensure you are connected to the VPN and try again.';
+                
+                // Reset button
+                button.disabled = false;
+                btnText.textContent = 'Connect to Service';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Add Enter key support
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkConnection();
+            }
+        });
+    </script>
+</body>
+</html>

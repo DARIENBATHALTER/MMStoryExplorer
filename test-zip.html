@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ZIP Test</title>
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+    <h1>ZIP File Test</h1>
+    <input type="file" id="zipfile" accept=".zip">
+    <pre id="output"></pre>
+    
+    <script>
+        document.getElementById('zipfile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const output = document.getElementById('output');
+            
+            try {
+                output.textContent = `Loading ${file.name}...\n`;
+                
+                // Try different loading methods
+                const arrayBuffer = await file.arrayBuffer();
+                output.textContent += `File size: ${arrayBuffer.byteLength} bytes\n`;
+                
+                const zip = await JSZip.loadAsync(arrayBuffer);
+                output.textContent += `ZIP loaded successfully!\n`;
+                output.textContent += `Files in ZIP:\n`;
+                
+                let count = 0;
+                zip.forEach((path, entry) => {
+                    if (count < 10) {
+                        output.textContent += `  ${path} (${entry.dir ? 'dir' : 'file'})\n`;
+                    }
+                    count++;
+                });
+                
+                if (count > 10) {
+                    output.textContent += `  ... and ${count - 10} more files\n`;
+                }
+                
+            } catch (error) {
+                output.textContent += `ERROR: ${error.message}\n`;
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

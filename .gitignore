@@ -1,0 +1,36 @@
+# macOS system files
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Node modules (if any)
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# FFmpeg binaries (large files)
+ffmpeg/*.wasm
+ffmpeg/*.data
+
+# Sample archives (potentially large)
+sample_archives/
+
+# Temporary files
+tmp/
+temp/

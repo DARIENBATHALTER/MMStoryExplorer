@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Archive Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- File Picker View -->
+        <div id="file-picker-view" class="view active">
+            <div class="container">
+                <h1 class="app-title">Story Archive Explorer</h1>
+                <p class="subtitle">Select your archive folder to begin</p>
+                <label for="folder-input" class="file-input-label">
+                    <div class="file-input-button">
+                        <svg class="folder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>Choose Archive Folder</span>
+                    </div>
+                    <input type="file" id="folder-input" webkitdirectory directory multiple accept=".zip" />
+                </label>
+            </div>
+        </div>
+
+        <!-- Home View -->
+        <div id="home-view" class="view">
+            <div class="container">
+                <header class="app-header">
+                    <h1 class="app-title">Story Archives</h1>
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="dates">By Date</button>
+                        <button class="toggle-btn" data-view="users">By User</button>
+                    </div>
+                </header>
+                
+                <div id="dates-view" class="content-view active">
+                    <div id="dates-list" class="dates-grid"></div>
+                </div>
+                
+                <div id="users-view" class="content-view">
+                    <div id="users-list" class="users-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Story Modal -->
+        <div id="story-modal" class="modal">
+            <div class="modal-content">
+                <div class="story-viewer">
+                    <div class="story-header">
+                        <div class="story-user-info">
+                            <div class="avatar-circle"></div>
+                            <div class="user-details">
+                                <span class="username"></span>
+                                <span class="story-date"></span>
+                            </div>
+                        </div>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div class="story-progress">
+                        <div class="progress-segments"></div>
+                    </div>
+                    <div class="story-media-container">
+                        <button class="nav-btn prev">&lt;</button>
+                        <div class="story-media"></div>
+                        <button class="nav-btn next">&gt;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

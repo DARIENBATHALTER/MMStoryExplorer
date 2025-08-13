@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+            display: block;
+        }
+        
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        
+        .test-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .log {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>FFmpeg-WASM Export Test</h1>
+        
+        <button id="test-init" class="test-btn">Test FFmpeg Initialization</button>
+        <button id="test-export" class="test-btn" disabled>Test Export (create sample)</button>
+        
+        <div id="log" class="log">Ready to test...\n</div>
+    </div>
+
+    <!-- FFmpeg WASM (with fallback) -->
+    <script>
+        // Load FFmpeg with error handling
+        function loadFFmpeg() {
+            return new Promise((resolve, reject) => {
+                const script1 = document.createElement('script');
+                script1.src = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js';
+                script1.onload = () => {
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js';
+                    script2.onload = () => {
+                        try {
+                            window.FFmpegWASM = FFmpeg;
+                            window.FFmpegUtil = FFmpegUtil;
+                            resolve(true);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    script2.onerror = () => reject(new Error('Failed to load FFmpeg util'));
+                    document.head.appendChild(script2);
+                };
+                script1.onerror = () => reject(new Error('Failed to load FFmpeg'));
+                document.head.appendChild(script1);
+            });
+        }
+
+        // Try to load FFmpeg, fallback to Canvas if it fails
+        window.ffmpegAvailable = false;
+        loadFFmpeg().then(() => {
+            window.ffmpegAvailable = true;
+            console.log('FFmpeg loaded successfully');
+        }).catch((error) => {
+            console.warn('FFmpeg failed to load, using Canvas fallback:', error);
+            window.ffmpegAvailable = false;
+        });
+    </script>
+    
+    <script src="export-handler.js"></script>
+    <script src="canvas-export-handler.js"></script>
+    
+    <script>
+        const log = document.getElementById('log');
+        const testInitBtn = document.getElementById('test-init');
+        const testExportBtn = document.getElementById('test-export');
+        
+        function addLog(message) {
+            log.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        let exportHandler = null;
+        
+        function initializeExportHandler() {
+            if (window.ffmpegAvailable && window.ExportHandler) {
+                exportHandler = new window.ExportHandler();
+                addLog('✓ Using FFmpeg export handler');
+                return 'ffmpeg';
+            } else if (window.CanvasExportHandler) {
+                exportHandler = new window.CanvasExportHandler();
+                addLog('✓ Using Canvas export handler (fallback)');
+                return 'canvas';
+            } else {
+                addLog('✗ No export handler available');
+                return null;
+            }
+        }
+        
+        testInitBtn.addEventListener('click', async () => {
+            testInitBtn.disabled = true;
+            testInitBtn.textContent = 'Initializing...';
+            
+            try {
+                const handlerType = initializeExportHandler();
+                
+                if (!exportHandler) {
+                    throw new Error('No export handler available');
+                }
+                
+                if (handlerType === 'ffmpeg') {
+                    addLog('Starting FFmpeg initialization...');
+                    await exportHandler.initialize();
+                    addLog('✓ FFmpeg initialized successfully!');
+                } else {
+                    addLog('✓ Canvas export handler ready!');
+                }
+                
+                testExportBtn.disabled = false;
+                testInitBtn.textContent = `✓ ${handlerType} Ready`;
+            } catch (error) {
+                addLog('✗ Failed to initialize export handler: ' + error.message);
+                testInitBtn.textContent = 'Initialization Failed';
+                testInitBtn.disabled = false;
+            }
+        });
+        
+        testExportBtn.addEventListener('click', async () => {
+            testExportBtn.disabled = true;
+            testExportBtn.textContent = 'Creating test export...';
+            
+            try {
+                addLog('Creating test canvas...');
+                
+                // Create a test canvas for testing
+                const canvas = document.createElement('canvas');
+                canvas.width = 1080;
+                canvas.height = 1920;
+                const ctx = canvas.getContext('2d');
+                
+                // Fill with gradient background
+                const gradient = ctx.createLinearGradient(0, 0, 0, 1920);
+                gradient.addColorStop(0, '#ff6b6b');
+                gradient.addColorStop(1, '#4ecdc4');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 1080, 1920);
+                
+                // Add some test text
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 60px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Test Story Export', 540, 960);
+                
+                addLog('Converting canvas to blob...');
+                const testBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+                const testUrl = URL.createObjectURL(testBlob);
+                
+                // Create a mock story object
+                const testStory = {
+                    username: 'testuser',
+                    type: 'image',
+                    url: testUrl,
+                    filename: 'testuser_story_20250812_01.jpg',
+                    date: '20250812'
+                };
+                
+                addLog('Exporting test story as video...');
+                const videoBlob = await exportHandler.exportStoryAsVideo(testStory, null);
+                
+                addLog('✓ Export completed! Size: ' + (videoBlob.size / 1024 / 1024).toFixed(2) + ' MB');
+                
+                // Download the test video
+                const filename = exportHandler.formatFileName('testuser', '20250812', 1);
+                await exportHandler.downloadBlob(videoBlob, filename);
+                
+                addLog('✓ Test video downloaded as: ' + filename);
+                testExportBtn.textContent = '✓ Test Export Complete';
+                
+            } catch (error) {
+                addLog('✗ Export test failed: ' + error.message);
+                console.error('Export error:', error);
+                testExportBtn.textContent = 'Test Export Failed';
+                testExportBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
